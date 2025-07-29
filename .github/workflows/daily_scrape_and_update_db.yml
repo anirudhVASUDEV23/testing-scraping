@@ -2,13 +2,17 @@ name: Daily Flipkart Data Scrape and DB Update
 
 on:
   schedule:
-    # Runs every day at 13:30 UTC (which is 7:00 PM IST)
-    - cron: "50 13 * * *"
+    # Runs every day at 14:30 UTC (which is 8:00 PM IST)
+    - cron: "30 14 * * *"
   workflow_dispatch: # Allows manual triggering of the workflow from GitHub UI
 
 jobs:
   scrape_and_update:
     runs-on: ubuntu-latest # Using a fresh Ubuntu runner
+
+    # Grant write permissions to the GITHUB_TOKEN for pushing changes
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -31,6 +35,7 @@ jobs:
 
       - name: Run Flipkart Data Scrape
         # Execute the scraping script. Paths are relative to the project root.
+        # This script (webscraping/flipkart_data_extraction.py) is now modified to scrape only 10 products for testing.
         run: python webscraping/flipkart_data_extraction.py
 
       - name: Run CSV to SQLite Conversion
