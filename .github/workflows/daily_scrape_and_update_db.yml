@@ -1,0 +1,49 @@
+name: Daily Flipkart Data Scrape and DB Update
+
+on:
+  schedule:
+    # Runs every day at 13:30 UTC (which is 7:00 PM IST)
+    - cron: "30 13 * * *"
+  workflow_dispatch: # Allows manual triggering of the workflow from GitHub UI
+
+jobs:
+  scrape_and_update:
+    runs-on: ubuntu-latest # Using a fresh Ubuntu runner
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4 # Action to check out your repository code
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9" # Specify a precise Python version for stability
+
+      - name: Install system dependencies for Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install selenium pandas beautifulsoup4 lxml webdriver_manager # webdriver_manager helps manage ChromeDriver
+
+      - name: Run Flipkart Data Scrape
+        # Execute the scraping script. Paths are relative to the project root.
+        run: python webscraping/flipkart_data_extraction.py
+
+      - name: Run CSV to SQLite Conversion
+        # Execute the script that converts CSVs to SQLite.
+        # This will create/update `app/flipkart.db`
+        run: python webscraping/csv_to_sqlite.py
+
+      - name: Commit and push changes
+        # This action automatically commits any changes and pushes them back to the repo.
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Automated: Updated Flipkart data and SQLite DB"
+          # Specify the branch to push to
+          branch: main # Or your default branch, e.g., 'master'
+          # Optional: Specify exact files to commit. If omitted, all changed files are committed.
+          # files: 'webscraping/flipkart_product_data.csv webscraping/unavailable_products.csv webscraping/duplicate_products.csv app/flipkart.db'
