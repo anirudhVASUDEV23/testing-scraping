@@ -3,7 +3,7 @@ name: Daily Flipkart Data Scrape and DB Update
 on:
   schedule:
     # Runs every day at 13:30 UTC (which is 7:00 PM IST)
-    - cron: "30 13 * * *"
+    - cron: "50 13 * * *"
   workflow_dispatch: # Allows manual triggering of the workflow from GitHub UI
 
 jobs:
